@@ -1,0 +1,88 @@
+<ASSEMBLER_INFO>
+ <VERSION>2.2.8</VERSION>
+ <DEVICE>"ATmega328P"</DEVICE>
+ <WORKING_DIR>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\Debug</WORKING_DIR>
+ <INCLUDE_PATH>
+  <DIR>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc</DIR>
+  <DIR>C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avrassembler\Include</DIR>
+  <DIR></DIR>
+ </INCLUDE_PATH>
+ <SOURCE_FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</SOURCE_FILE>
+ <INCLUDED_FILES>
+  <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc</FILE>
+ </INCLUDED_FILES>
+ <OBJECT_FILES>
+  <FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\Debug\Lab3.obj</FILE>
+ </OBJECT_FILES>
+ <HEX_FILES>
+  <FILE>Lab3.hex</FILE>
+ </HEX_FILES>
+ <OUTPUT_FILES>
+  <FILE>Lab3.map</FILE>
+  <FILE>Lab3.lss</FILE>
+ </OUTPUT_FILES>
+ <LABELS>
+  <start><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>58</LINE></start>
+  <wait_for_release_button0><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>114</LINE></wait_for_release_button0>
+  <read_rpg><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>70</LINE></read_rpg>
+  <resolve_digits><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>146</LINE></resolve_digits>
+  <display><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>280</LINE></display>
+  <do_clockwise><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>85</LINE></do_clockwise>
+  <do_counterclockwise><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>89</LINE></do_counterclockwise>
+  <end_read_rpg><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>93</LINE></end_read_rpg>
+  <increment_counter><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>98</LINE></increment_counter>
+  <decrement_counter><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>106</LINE></decrement_counter>
+  <end_increment_counter><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>103</LINE></end_increment_counter>
+  <end_decrement_counter><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>111</LINE></end_decrement_counter>
+  <button0_held><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>121</LINE></button0_held>
+  <delay_10ms><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>329</LINE></delay_10ms>
+  <increment_button_timer><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>139</LINE></increment_button_timer>
+  <reset_counter><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>133</LINE></reset_counter>
+  <end_wait_for_release_button0><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>136</LINE></end_wait_for_release_button0>
+  <end_increment_button_timer><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>143</LINE></end_increment_button_timer>
+  <try_00><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>149</LINE></try_00>
+  <set_00><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>153</LINE></set_00>
+  <try_01><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>157</LINE></try_01>
+  <end_resolve><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>277</LINE></end_resolve>
+  <set_01><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>161</LINE></set_01>
+  <try_02><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>165</LINE></try_02>
+  <set_02><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>169</LINE></set_02>
+  <try_03><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>173</LINE></try_03>
+  <set_03><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>177</LINE></set_03>
+  <try_04><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>181</LINE></try_04>
+  <set_04><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>185</LINE></set_04>
+  <try_05><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>189</LINE></try_05>
+  <set_05><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>193</LINE></set_05>
+  <try_06><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>197</LINE></try_06>
+  <set_06><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>201</LINE></set_06>
+  <try_07><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>205</LINE></try_07>
+  <set_07><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>209</LINE></set_07>
+  <try_08><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>213</LINE></try_08>
+  <set_08><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>217</LINE></set_08>
+  <try_09><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>221</LINE></try_09>
+  <set_09><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>225</LINE></set_09>
+  <try_10><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>229</LINE></try_10>
+  <set_10><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>233</LINE></set_10>
+  <try_11><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>237</LINE></try_11>
+  <set_11><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>241</LINE></set_11>
+  <try_12><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>245</LINE></try_12>
+  <set_12><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>249</LINE></set_12>
+  <try_13><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>253</LINE></try_13>
+  <set_13><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>257</LINE></set_13>
+  <try_14><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>261</LINE></try_14>
+  <set_14><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>265</LINE></set_14>
+  <try_15><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>269</LINE></try_15>
+  <set_15><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>273</LINE></set_15>
+  <loop_digit0><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>291</LINE></loop_digit0>
+  <set_ser_in_1_digit0><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>297</LINE></set_ser_in_1_digit0>
+  <end_digit0><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>300</LINE></end_digit0>
+  <d1_10ms><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>332</LINE></d1_10ms>
+  <d2_10ms><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>334</LINE></d2_10ms>
+  <delay_1s><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>347</LINE></delay_1s>
+  <d1_1s><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>350</LINE></d1_1s>
+  <d2_1s><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>352</LINE></d2_1s>
+  <delay_500ms><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>365</LINE></delay_500ms>
+  <d1_500ms><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>368</LINE></d1_500ms>
+  <d2_500ms><FILE>c:\users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm</FILE><LINE>370</LINE></d2_500ms>
+ </LABELS>
+</ASSEMBLER_INFO>

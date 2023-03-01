@@ -27,22 +27,72 @@
 ;E = 79
 ;F = 71
 ;. = 80
-
 ;- = 40
 
 .equ SERIAL=0		; SERIAL is PB0 (Pin 8)
 .equ RCLK=1			; RCLK is PB1 (Pin 9)
 .equ SRCLK=2		; SRCLK is PB2 (Pin 10)
-.equ BUTTON=3		; BUTTON is PB3 (Pin 11)
-.equ RPG0=4			; RPG0 is PB4 (Pin 12)
+.equ BUTTON0=3		; BUTTON0 is PB3 (Pin 11)
 .equ LED=5			; Display LED is PB5 (Pin 13)
-.equ RPG1=6			; RPG1 is PB6 (Pin 14)
 
+.equ RPG0=2			; RPG0 is PD2 (Pin 2)
+.equ RPG1=3			; RPG1 is PD3 (Pin 3)
+
+; Data-direction register setup
+sbi DDRB, SERIAL	; Set SERIAL (PB0/Pin 8) as output
+sbi DDRB, RCLK		; Set RCLK (PB1/Pin 9) as output
+sbi DDRB, SRCLK		; Set SRCLK (PB2/Pin 10) as output
+cbi DDRB, BUTTON0	; Set BUTTON0 (PB3/Pin 11) as input
+sbi DDRB, LED		; Set LED (Pin 13) as output
+
+cbi DDRD, RPG0		; Set RPG0 (PD2/Pin 2) as input
+cbi DDRD, RPG1		; Set RPG1 (PD3/Pin 3) as input
+
+; Initialize registers to 0
+ldi R16, 0
+ldi R20, 0
+ldi R21, 0
+ldi R22, 0
 
 ; Replace with your application code
 start:
-    inc r16
+    sbis PINB, BUTTON0
+	rcall wait_for_release_button0
+
+	rcall read_rpg
+
+	rcall resolve_digits
+	rcall display
+
     rjmp start
+
+
+read_rpg:
+	in R21, PIND	; Read all pins on Port D simultaneously
+	lsr R21			; Shift contents to the right
+	lsr R21	
+	andi R21, 0x03	; Ignore all but two least-significant bits
+	mov R22, R21
+	lsl R22			; Make room for previous reading into R22
+	lsl R22
+	or R22, R20		; Load previous reading (R20) into current comparison (R22)
+	cpi R22, 0x0D	;  (Reading now in detent after clockwise rotation)
+	breq do_clockwise
+	cpi R22, 0x0E	; (Reading now in detent after counter-clockwise rotation)
+	breq do_counterclockwise
+	rjmp end_read_rpg
+
+do_clockwise:
+	rcall increment_counter
+	rjmp end_read_rpg
+
+do_counterclockwise:
+	rcall decrement_counter
+	rjmp end_read_rpg
+
+end_read_rpg:
+	mov R20, R21	; Save current reading as previous reading
+	ret
 
 
 increment_counter:
@@ -86,8 +136,14 @@ reset_counter:
 end_wait_for_release_button0:
 	ret
 
+increment_button_timer:
+	cpi R21, 100
+	breq end_increment_button_timer
+	inc R21
+end_increment_button_timer:
+	ret
+
 resolve_digits:
-; R19 - digit1
 ; R17 - digit0
 
 try_00:
@@ -175,7 +231,7 @@ try_10:
 	breq set_10
 	rjmp try_11
 set_10:
-	ldi R17, 0x3F; 0
+	ldi R17, 0x77; A
 	rjmp end_resolve
 
 try_11:
@@ -183,7 +239,7 @@ try_11:
 	breq set_11
 	rjmp try_12
 set_11:
-	ldi R17, 0x06; 1
+	ldi R17, 0x7C; B
 	rjmp end_resolve
 
 try_12:
@@ -191,7 +247,7 @@ try_12:
 	breq set_12
 	rjmp try_13
 set_12:
-	ldi R17, 0x5B; 2
+	ldi R17, 0x39; C
 	rjmp end_resolve
 
 try_13:
@@ -199,7 +255,7 @@ try_13:
 	breq set_13
 	rjmp try_14
 set_13:
-	ldi R17, 0x4F; 3
+	ldi R17, 0x5E; D
 	rjmp end_resolve
 
 try_14:
@@ -207,15 +263,15 @@ try_14:
 	breq set_14
 	rjmp try_15
 set_14:
-	ldi R17, 0x66; 4
+	ldi R17, 0x79; E
 	rjmp end_resolve
 
 try_15:
 	cpi R16, 15
 	breq set_15
-	rjmp try_16
+	rjmp end_resolve
 set_15:
-	ldi R17, 0x6D; 5
+	ldi R17, 0x71; F
 	rjmp end_resolve
 
 end_resolve:
