@@ -11,23 +11,62 @@
 
 ; 7-segement bit-patterns
 ;0 = 3F
+.equ d0=0x3F
+
 ;1 = 06
+.equ d1=0x06
+
 ;2 = 5B
+.equ d2=0x5B
+
 ;3 = 4F
+.equ d3=0x4F
+
 ;4 = 66
+.equ d4=0x66
+
 ;5 = 6D
+.equ d5=0x6D
+
 ;6 = 7D
+.equ d6=0x7D
+
 ;7 = 07
+.equ d7=0x07
+
 ;8 = 7F
+.equ d8=0x7F
+
 ;9 = 6F
+.equ d9=0x6F
+
 ;A = 77
+.equ dA=0x77
+
 ;B = 7C
+.equ dB=0x7C
+
 ;C = 39
+.equ dC=0x39
+
 ;D = 5E
+.equ dD=0x5E
+
 ;E = 79
+.equ dE=0x79
+
 ;F = 71
+.equ dF=0x71
+
 ;. = 80
+.equ d_dot=0x80
+
 ;- = 40
+.equ d_dash=0x40
+
+;_ = 08
+.equ d_underscore=0x08
+
 
 .equ SERIAL=0		; SERIAL is PB0 (Pin 8)
 .equ RCLK=1			; RCLK is PB1 (Pin 9)
@@ -49,10 +88,16 @@ cbi DDRD, RPG0		; Set RPG0 (PD2/Pin 2) as input
 cbi DDRD, RPG1		; Set RPG1 (PD3/Pin 3) as input
 
 ; Initialize registers to 0
-ldi R16, 0
-ldi R20, 0
-ldi R21, 0
-ldi R22, 0
+ldi R16, 0	; Current digit entered
+ldi R20, 0	; Previous reading of RPG
+ldi R21, 0	; Current reading of RPG, timer counter
+ldi R22, 0	; Comparison register for RPG read
+ldi R23, 0	; Current digit being entered
+ldi R24, 0	; Digit 1
+ldi R25, 0  ; Digit 2
+ldi R26, 0	; Digit 3
+ldi R27, 0	; Digit 4
+ldi R28, 0	; Digit 5
 
 ; Replace with your application code
 start:
@@ -84,15 +129,139 @@ read_rpg:
 
 do_clockwise:
 	rcall increment_counter
+	cpi R23, 0			; Motion from RPG should change the dash display to a digit. If R23 is 0, the dash is being displayed. Motion should cancel this.
+	brne end_do_clockwise
+	inc R23
+	clr R16
+end_do_clockwise: 
 	rjmp end_read_rpg
 
 do_counterclockwise:
 	rcall decrement_counter
+	cpi R23, 0
+	brne end_do_counterclockwise
+	inc R23
+	clr R16
+end_do_counterclockwise:
 	rjmp end_read_rpg
 
 end_read_rpg:
 	mov R20, R21	; Save current reading as previous reading
 	ret
+
+
+enter_digit:
+try_1:
+	cpi R23, 1
+	breq enter_1
+	rjmp try_2
+enter_1:
+	mov R24, R16
+	inc R23
+	rcall flash_digit
+	rjmp end_enter_digit
+try_2:
+	cpi R23, 2
+	breq enter_2
+	rjmp try_3
+enter_2:
+	mov R25, R16
+	inc R23
+	rcall flash_digit
+	rjmp end_enter_digit
+try_3:
+	cpi R23, 3
+	breq enter_3
+	rjmp try_4
+enter_3:
+	mov R26, R16
+	inc R23
+	rcall flash_digit
+	rjmp end_enter_digit
+try_4:
+	cpi R23, 4
+	breq enter_4
+	rjmp try_5
+enter_4:
+	mov R27, R16
+	inc R23
+	rcall flash_digit
+	rjmp end_enter_digit
+try_5:
+	cpi R23, 5
+	breq enter_5
+	rjmp end_enter_digit
+enter_5:
+	mov R28, R16
+	rcall test_lock_sequence
+	clr R23 ; Reset digit counter to 0. Begin displaying dash and allowing input.
+	rjmp end_enter_digit
+
+end_enter_digit:
+	ret
+
+test_lock_sequence:
+; Valid sequence - DA181
+; Test each digit one by one
+	cpi R24, 0x0D		; Digit 1
+	brne fail_sequence
+	cpi R25, 0x0A		; Digit 2
+	brne fail_sequence
+	cpi R26, 0x01		; Digit 3
+	brne fail_sequence
+	cpi R27, 0x08		; Digit 4
+	brne fail_sequence
+	cpi R28, 0x01		; Digit 5
+	brne fail_sequence
+	; All digits are correct. Initiate success sequence.
+success_sequence: ; If success occurs, display Arduino LED and display "." on 7-segment for 5 seconds
+	ldi R17, d_dot
+	rcall display
+	sbi PORTB, LED	; Turn on Arduino LED
+	ldi R29, 5		; Delay 5 seconds
+
+loop_delay_5s:
+	rcall delay_1s
+	dec R29
+	brne loop_delay_5s
+
+	cbi PORTB, LED ; Turn off Arduino LED
+	rjmp end_test_lock_sequence
+
+
+fail_sequence: ; If failure occurs, display an underscore while delaying for 9 seconds
+	ldi R17, d_underscore
+	rcall display
+	ldi R29, 9 ; Delay 9 seconds
+loop_delay_9s:
+	rcall delay_1s
+	dec R29
+	brne loop_delay_9s
+
+
+end_test_lock_sequence:
+	ret
+
+
+flash_digit:
+	ldi R17, 0
+	rcall display
+	rcall delay_500ms
+
+	rcall resolve_digits
+	rcall display
+	rcall delay_500ms
+
+	ldi R17, 0
+	rcall display
+	rcall delay_500ms
+
+	rcall resolve_digits
+	rcall display
+	rcall delay_500ms
+
+	ret
+
 
 
 increment_counter:
@@ -115,7 +284,7 @@ wait_for_release_button0:
 ; Note: Button is Active-Low. So I/O bit will be set when released.
 ; Behavior: If button is held for >= 1s, counter is reset.
 ; Otherwise, if released before 1s, counter is incremented.
-	
+	push R21
 	clr R21 ; Initialize button timer to 0
 
 button0_held:
@@ -127,13 +296,15 @@ button0_held:
 	cpi R21, 100
 	breq reset_counter
 
-	rcall increment_counter
+	rcall enter_digit
 	rjmp end_wait_for_release_button0
 
 reset_counter:
-	clr R16
+	clr R23	; Reset to display dash
+	clr R16	; Clear main counter
 
 end_wait_for_release_button0:
+	pop R21
 	ret
 
 increment_button_timer:
@@ -146,12 +317,20 @@ end_increment_button_timer:
 resolve_digits:
 ; R17 - digit0
 
+try_dash:
+	cpi R23, 0
+	breq set_dash
+	rjmp try_00
+set_dash:
+	ldi R17, d_dash
+	rjmp end_resolve
+
 try_00:
 	cpi R16, 0
 	breq set_00
 	rjmp try_01
 set_00:
-	ldi R17, 0x3F; 0
+	ldi R17, d0; 0
 	rjmp end_resolve
 
 try_01:
@@ -159,7 +338,7 @@ try_01:
 	breq set_01
 	rjmp try_02
 set_01:
-	ldi R17, 0x06; 1
+	ldi R17, d1; 1
 	rjmp end_resolve
 
 try_02:
@@ -167,7 +346,7 @@ try_02:
 	breq set_02
 	rjmp try_03
 set_02:
-	ldi R17, 0x5B; 2
+	ldi R17, d2; 2
 	rjmp end_resolve
 
 try_03:
@@ -175,7 +354,7 @@ try_03:
 	breq set_03
 	rjmp try_04
 set_03:
-	ldi R17, 0x4F; 3
+	ldi R17, d3; 3
 	rjmp end_resolve
 
 try_04:
@@ -183,7 +362,7 @@ try_04:
 	breq set_04
 	rjmp try_05
 set_04:
-	ldi R17, 0x66; 4
+	ldi R17, d4; 4
 	rjmp end_resolve
 
 try_05:
@@ -191,7 +370,7 @@ try_05:
 	breq set_05
 	rjmp try_06
 set_05:
-	ldi R17, 0x6D; 5
+	ldi R17, d5; 5
 	rjmp end_resolve
 
 try_06:
@@ -199,7 +378,7 @@ try_06:
 	breq set_06
 	rjmp try_07
 set_06:
-	ldi R17, 0x7D; 6
+	ldi R17, d6; 6
 	rjmp end_resolve
 
 try_07:
@@ -207,7 +386,7 @@ try_07:
 	breq set_07
 	rjmp try_08
 set_07:
-	ldi R17, 0x07; 7
+	ldi R17, d7; 7
 	rjmp end_resolve
 
 try_08:
@@ -215,7 +394,7 @@ try_08:
 	breq set_08
 	rjmp try_09
 set_08:
-	ldi R17, 0x7F; 8
+	ldi R17, d8; 8
 	rjmp end_resolve
 
 try_09:
@@ -223,7 +402,7 @@ try_09:
 	breq set_09
 	rjmp try_10
 set_09:
-	ldi R17, 0x6F; 9
+	ldi R17, d9; 9
 	rjmp end_resolve
 
 try_10:
@@ -231,7 +410,7 @@ try_10:
 	breq set_10
 	rjmp try_11
 set_10:
-	ldi R17, 0x77; A
+	ldi R17, dA; A
 	rjmp end_resolve
 
 try_11:
@@ -239,7 +418,7 @@ try_11:
 	breq set_11
 	rjmp try_12
 set_11:
-	ldi R17, 0x7C; B
+	ldi R17, dB; B
 	rjmp end_resolve
 
 try_12:
@@ -247,7 +426,7 @@ try_12:
 	breq set_12
 	rjmp try_13
 set_12:
-	ldi R17, 0x39; C
+	ldi R17, dC; C
 	rjmp end_resolve
 
 try_13:
@@ -255,7 +434,7 @@ try_13:
 	breq set_13
 	rjmp try_14
 set_13:
-	ldi R17, 0x5E; D
+	ldi R17, dD; D
 	rjmp end_resolve
 
 try_14:
@@ -263,7 +442,7 @@ try_14:
 	breq set_14
 	rjmp try_15
 set_14:
-	ldi R17, 0x79; E
+	ldi R17, dE; E
 	rjmp end_resolve
 
 try_15:
@@ -271,7 +450,7 @@ try_15:
 	breq set_15
 	rjmp end_resolve
 set_15:
-	ldi R17, 0x71; F
+	ldi R17, dF; F
 	rjmp end_resolve
 
 end_resolve:
@@ -302,6 +481,8 @@ end_digit0:
 	cbi PORTB,SRCLK
 	nop
 	sbi PORTB,SRCLK
+	nop
+	cbi PORTB, SRCLK
 	dec R18
 	brne loop_digit0
 
@@ -324,58 +505,99 @@ end_digit0:
 
 ; ------------ Delay times ------------
 
-.equ count10ms = 0x00C9			; assign a 16-bit value to symbol "count"
-
-delay_10ms:
-	ldi r30, low(count10ms)	 		; r31:r30  <-- load a 16-bit value into counter register for outer loop
-	ldi r31, high(count10ms)
-d1_10ms:
-	ldi   r29, 0x84			   	; r29 <-- load a 8-bit value into counter register for inner loop
-d2_10ms:
-	nop
-	nop
-	nop
-	dec   r29
-	brne  d2_10ms
-	sbiw r31:r30, 1
-	brne d1_10ms
-	ret
-
-.equ count1s = 0x6E09
-
 
 delay_1s:
-	ldi r30, low(count1s)	 		; r31:r30  <-- load a 16-bit value into counter register for outer loop
-	ldi r31, high(count1s)
-d1_1s:
-	ldi   r29, 0x5E			   	; r29 <-- load a 8-bit value into counter register for inner loop
-d2_1s:
-	nop
-	nop
-	nop
-	dec   r29
-	brne  d2_1s
-	sbiw r31:r30, 1
-	brne d1_1s
+	rcall delay_500ms
+	rcall delay_500ms
 	ret
 
-
-.equ count500ms = 0xDC12
 
 delay_500ms:
-	ldi r30, low(count500ms)	 		; r31:r30  <-- load a 16-bit value into counter register for outer loop
-	ldi r31, high(count500ms)
-d1_500ms:
-	ldi   r29, 0x17			   	; r29 <-- load a 8-bit value into counter register for inner loop
-d2_500ms:
-	nop
-	nop
-	nop
-	dec   r29
-	brne  d2_500ms
-	sbiw r31:r30, 1
-	brne d1_500ms
+	; Backup registers used onto the stack
+	push r16
+	push r17
+	push r18
+	push r19
+	push r20
+
+	ldi r17, 0
+	ldi r18, 0
+	ldi r19, 0
+	ldi r20, 0
+
+	; Initialize timer
+	ldi r16, (1 << CS02)	; Set prescaler to 256
+	out TCCR0B, r16			; Set TImer0 control register B
+	clr r16
+	out TCCR0A, r16			; Set Timer0 to normal mode
+	out TCNT0, r16			; Set Timer0 to 0
+
+loop_delay_500ms:
+	in r17, TCNT0	; Reader Timer0 value
+	mov r18, r17	; Copy current reading so that arithmetic can be performed on r17
+	sub r17, r16	; Get time difference between current reading (r17) and previous reading (r16)
+	mov r16, r18	; Save current reading as previous reading
+	add r19, r17	; Add time difference to running total
+	brvs add_to_counter_500ms
+	rjmp loop_delay_500ms
+
+add_to_counter_500ms:
+	inc r20	; Amount of time has surpassed 256 counter ticks (256 * (1/(16000000Hz/256)) = 0.004096s)
+	cpi r20, 123 ; (Check to see if 123 overflows have occurred. 123 * 0.004096s = 0.503808s)
+	breq end_delay_500ms
+	rjmp loop_delay_500ms
+
+end_delay_500ms:
+	pop r20
+	pop r19
+	pop r18
+	pop r17
+	pop r16
 	ret
 
+
+
+delay_10ms:
+	; Backup registered used onto the stack
+	push r16
+	push r17
+	push r18
+	push r19
+	push r20
+
+	ldi r17, 0
+	ldi r18, 0
+	ldi r19, 0
+	ldi r20, 0
+
+	; Initialize timer
+	ldi r16, 0b00000010		; Set prescaler value to 8
+	out TCCR0B, r16			; Write prescaler value to control register
+	clr r16
+	out TCCR0A, r16			; Set Timer0 to normal mode
+	out TCNT0, r16			; Set Timer0 to 0
+
+loop_delay_10ms:
+	in r17, TCNT0	; Reader Timer0 value
+	mov r18, r17	; Copy current reading so that arithmetic can be performed on r17
+	sub r17, r16	; Get time difference between current reading (r17) and previous reading (r16)
+	mov r16, r18	; Save current reading as previous reading
+	add r19, r17	; Add time difference to running total
+	brvs add_to_counter_10ms
+	rjmp loop_delay_10ms
+
+add_to_counter_10ms:
+	inc r20	; Amount of time has surpassed 256 counter ticks (256 * (1/(16000000Hz/8)) = 0.000128s)
+	cpi r20, 78 ; (Check to see if 78 overflows have occurred. 78 * 0.000128s = 0.009984s)
+	breq end_delay_10ms
+	rjmp loop_delay_10ms
+
+end_delay_10ms:
+	pop r20
+	pop r19
+	pop r18
+	pop r17
+	pop r16
+	ret
 
 .exit
