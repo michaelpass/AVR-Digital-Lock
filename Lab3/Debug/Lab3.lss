@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm Mon Mar 06 19:46:43 2023
+AVRASM ver. 2.2.8  C:\Users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm Mon Mar 06 20:11:10 2023
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
 C:\Users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm(8): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
@@ -1137,8 +1137,8 @@ C:\Users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm(8): Including
                                  
 000013 d003                      	rcall read_rpg
                                  
-000014 d082                      	rcall resolve_digits
-000015 d0d7                      	rcall display
+000014 d085                      	rcall resolve_digits
+000015 d0da                      	rcall display
                                  
 000016 cffa                          rjmp start
                                  
@@ -1247,12 +1247,12 @@ C:\Users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm(8): Including
                                  	; All digits are correct. Initiate success sequence.
                                  success_sequence: ; If success occurs, display Arduino LED and display "." on 7-segment for 5 seconds
 000060 e810                      	ldi R17, d_dot
-000061 d08b                      	rcall display
+000061 d08e                      	rcall display
 000062 9a2d                      	sbi PORTB, LED	; Turn on Arduino LED
 000063 e0d5                      	ldi R29, 5		; Delay 5 seconds
                                  
                                  loop_delay_5s:
-000064 d0a3                      	rcall delay_1s
+000064 d0a6                      	rcall delay_1s
 000065 95da                      	dec R29
 000066 f7e9                      	brne loop_delay_5s
                                  
@@ -1262,10 +1262,10 @@ C:\Users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm(8): Including
                                  
                                  fail_sequence: ; If failure occurs, display an underscore while delaying for 9 seconds
 000069 e018                      	ldi R17, d_underscore
-00006a d082                      	rcall display
+00006a d085                      	rcall display
 00006b e0d9                      	ldi R29, 9 ; Delay 9 seconds
                                  loop_delay_9s:
-00006c d09b                      	rcall delay_1s
+00006c d09e                      	rcall delay_1s
 00006d 95da                      	dec R29
 00006e f7e9                      	brne loop_delay_9s
                                  
@@ -1276,20 +1276,20 @@ C:\Users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm(8): Including
                                  
                                  flash_digit:
 000070 e010                      	ldi R17, 0
-000071 d07b                      	rcall display
-000072 d098                      	rcall delay_500ms
+000071 d07e                      	rcall display
+000072 d09b                      	rcall delay_500ms
                                  
-000073 d023                      	rcall resolve_digits
-000074 d078                      	rcall display
-000075 d095                      	rcall delay_500ms
+000073 d026                      	rcall resolve_digits
+000074 d07b                      	rcall display
+000075 d098                      	rcall delay_500ms
                                  
 000076 e010                      	ldi R17, 0
-000077 d075                      	rcall display
-000078 d092                      	rcall delay_500ms
+000077 d078                      	rcall display
+000078 d095                      	rcall delay_500ms
                                  
-000079 d01d                      	rcall resolve_digits
-00007a d072                      	rcall display
-00007b d08f                      	rcall delay_500ms
+000079 d020                      	rcall resolve_digits
+00007a d075                      	rcall display
+00007b d092                      	rcall delay_500ms
                                  
 00007c 9508                      	ret
                                  
@@ -1319,317 +1319,321 @@ C:\Users\michaelpass\Documents\Atmel Studio\7.0\Lab3\Lab3\main.asm(8): Including
 000086 2755                      	clr R21 ; Initialize button timer to 0
                                  
                                  button0_held:
-000087 d0a2                      	rcall delay_10ms
-000088 d00a                      	rcall increment_button_timer
+000087 d0a5                      	rcall delay_10ms
+000088 d00d                      	rcall increment_button_timer
 000089 9b1b                      	sbis PINB, BUTTON0
 00008a cffc                      	rjmp button0_held
                                  
-00008b 3654                      	cpi R21, 100
-00008c f011                      	breq reset_counter
+00008b 3655                      	cpi R21, 101	; Check number of 10ms delays the button was held for. If less than 101 delays (<=1s), enter current digit
+00008c f018                      	brcs less_than_101
+00008d 3c58                      	cpi R21, 200	; Check number of 10ms delays the button was held for. Maxes out at 200.
+00008e f019                      	breq reset_counter
+00008f c004                      	rjmp end_wait_for_release_button0
                                  
-00008d dfa4                      	rcall enter_digit
-00008e c002                      	rjmp end_wait_for_release_button0
+                                 less_than_101:
+000090 dfa1                      	rcall enter_digit
+000091 c002                      	rjmp end_wait_for_release_button0
                                  
                                  reset_counter:
-00008f 2777                      	clr R23	; Reset to display dash
-000090 2700                      	clr R16	; Clear main counter
+000092 2777                      	clr R23	; Reset to display dash
+000093 2700                      	clr R16	; Clear main counter
                                  
                                  end_wait_for_release_button0:
-000091 915f                      	pop R21
-000092 9508                      	ret
+000094 915f                      	pop R21
+000095 9508                      	ret
                                  
                                  increment_button_timer:
-000093 3654                      	cpi R21, 100
-000094 f009                      	breq end_increment_button_timer
-000095 9553                      	inc R21
+000096 3c58                      	cpi R21, 200
+000097 f009                      	breq end_increment_button_timer
+000098 9553                      	inc R21
                                  end_increment_button_timer:
-000096 9508                      	ret
+000099 9508                      	ret
                                  
                                  resolve_digits:
                                  ; R17 - digit0
                                  
                                  try_dash:
-000097 3070                      	cpi R23, 0
-000098 f009                      	breq set_dash
-000099 c002                      	rjmp try_00
+00009a 3070                      	cpi R23, 0
+00009b f009                      	breq set_dash
+00009c c002                      	rjmp try_00
                                  set_dash:
-00009a e410                      	ldi R17, d_dash
-00009b c050                      	rjmp end_resolve
+00009d e410                      	ldi R17, d_dash
+00009e c050                      	rjmp end_resolve
                                  
                                  try_00:
-00009c 3000                      	cpi R16, 0
-00009d f009                      	breq set_00
-00009e c002                      	rjmp try_01
+00009f 3000                      	cpi R16, 0
+0000a0 f009                      	breq set_00
+0000a1 c002                      	rjmp try_01
                                  set_00:
-00009f e31f                      	ldi R17, d0; 0
-0000a0 c04b                      	rjmp end_resolve
+0000a2 e31f                      	ldi R17, d0; 0
+0000a3 c04b                      	rjmp end_resolve
                                  
                                  try_01:
-0000a1 3001                      	cpi R16, 1
-0000a2 f009                      	breq set_01
-0000a3 c002                      	rjmp try_02
+0000a4 3001                      	cpi R16, 1
+0000a5 f009                      	breq set_01
+0000a6 c002                      	rjmp try_02
                                  set_01:
-0000a4 e016                      	ldi R17, d1; 1
-0000a5 c046                      	rjmp end_resolve
+0000a7 e016                      	ldi R17, d1; 1
+0000a8 c046                      	rjmp end_resolve
                                  
                                  try_02:
-0000a6 3002                      	cpi R16, 2
-0000a7 f009                      	breq set_02
-0000a8 c002                      	rjmp try_03
+0000a9 3002                      	cpi R16, 2
+0000aa f009                      	breq set_02
+0000ab c002                      	rjmp try_03
                                  set_02:
-0000a9 e51b                      	ldi R17, d2; 2
-0000aa c041                      	rjmp end_resolve
+0000ac e51b                      	ldi R17, d2; 2
+0000ad c041                      	rjmp end_resolve
                                  
                                  try_03:
-0000ab 3003                      	cpi R16, 3
-0000ac f009                      	breq set_03
-0000ad c002                      	rjmp try_04
+0000ae 3003                      	cpi R16, 3
+0000af f009                      	breq set_03
+0000b0 c002                      	rjmp try_04
                                  set_03:
-0000ae e41f                      	ldi R17, d3; 3
-0000af c03c                      	rjmp end_resolve
+0000b1 e41f                      	ldi R17, d3; 3
+0000b2 c03c                      	rjmp end_resolve
                                  
                                  try_04:
-0000b0 3004                      	cpi R16, 4
-0000b1 f009                      	breq set_04
-0000b2 c002                      	rjmp try_05
+0000b3 3004                      	cpi R16, 4
+0000b4 f009                      	breq set_04
+0000b5 c002                      	rjmp try_05
                                  set_04:
-0000b3 e616                      	ldi R17, d4; 4
-0000b4 c037                      	rjmp end_resolve
+0000b6 e616                      	ldi R17, d4; 4
+0000b7 c037                      	rjmp end_resolve
                                  
                                  try_05:
-0000b5 3005                      	cpi R16, 5
-0000b6 f009                      	breq set_05
-0000b7 c002                      	rjmp try_06
+0000b8 3005                      	cpi R16, 5
+0000b9 f009                      	breq set_05
+0000ba c002                      	rjmp try_06
                                  set_05:
-0000b8 e61d                      	ldi R17, d5; 5
-0000b9 c032                      	rjmp end_resolve
+0000bb e61d                      	ldi R17, d5; 5
+0000bc c032                      	rjmp end_resolve
                                  
                                  try_06:
-0000ba 3006                      	cpi R16, 6
-0000bb f009                      	breq set_06
-0000bc c002                      	rjmp try_07
+0000bd 3006                      	cpi R16, 6
+0000be f009                      	breq set_06
+0000bf c002                      	rjmp try_07
                                  set_06:
-0000bd e71d                      	ldi R17, d6; 6
-0000be c02d                      	rjmp end_resolve
+0000c0 e71d                      	ldi R17, d6; 6
+0000c1 c02d                      	rjmp end_resolve
                                  
                                  try_07:
-0000bf 3007                      	cpi R16, 7
-0000c0 f009                      	breq set_07
-0000c1 c002                      	rjmp try_08
+0000c2 3007                      	cpi R16, 7
+0000c3 f009                      	breq set_07
+0000c4 c002                      	rjmp try_08
                                  set_07:
-0000c2 e017                      	ldi R17, d7; 7
-0000c3 c028                      	rjmp end_resolve
+0000c5 e017                      	ldi R17, d7; 7
+0000c6 c028                      	rjmp end_resolve
                                  
                                  try_08:
-0000c4 3008                      	cpi R16, 8
-0000c5 f009                      	breq set_08
-0000c6 c002                      	rjmp try_09
+0000c7 3008                      	cpi R16, 8
+0000c8 f009                      	breq set_08
+0000c9 c002                      	rjmp try_09
                                  set_08:
-0000c7 e71f                      	ldi R17, d8; 8
-0000c8 c023                      	rjmp end_resolve
+0000ca e71f                      	ldi R17, d8; 8
+0000cb c023                      	rjmp end_resolve
                                  
                                  try_09:
-0000c9 3009                      	cpi R16, 9
-0000ca f009                      	breq set_09
-0000cb c002                      	rjmp try_10
+0000cc 3009                      	cpi R16, 9
+0000cd f009                      	breq set_09
+0000ce c002                      	rjmp try_10
                                  set_09:
-0000cc e61f                      	ldi R17, d9; 9
-0000cd c01e                      	rjmp end_resolve
+0000cf e61f                      	ldi R17, d9; 9
+0000d0 c01e                      	rjmp end_resolve
                                  
                                  try_10:
-0000ce 300a                      	cpi R16, 10
-0000cf f009                      	breq set_10
-0000d0 c002                      	rjmp try_11
+0000d1 300a                      	cpi R16, 10
+0000d2 f009                      	breq set_10
+0000d3 c002                      	rjmp try_11
                                  set_10:
-0000d1 e717                      	ldi R17, dA; A
-0000d2 c019                      	rjmp end_resolve
+0000d4 e717                      	ldi R17, dA; A
+0000d5 c019                      	rjmp end_resolve
                                  
                                  try_11:
-0000d3 300b                      	cpi R16, 11
-0000d4 f009                      	breq set_11
-0000d5 c002                      	rjmp try_12
+0000d6 300b                      	cpi R16, 11
+0000d7 f009                      	breq set_11
+0000d8 c002                      	rjmp try_12
                                  set_11:
-0000d6 e71c                      	ldi R17, dB; B
-0000d7 c014                      	rjmp end_resolve
+0000d9 e71c                      	ldi R17, dB; B
+0000da c014                      	rjmp end_resolve
                                  
                                  try_12:
-0000d8 300c                      	cpi R16, 12
-0000d9 f009                      	breq set_12
-0000da c002                      	rjmp try_13
+0000db 300c                      	cpi R16, 12
+0000dc f009                      	breq set_12
+0000dd c002                      	rjmp try_13
                                  set_12:
-0000db e319                      	ldi R17, dC; C
-0000dc c00f                      	rjmp end_resolve
+0000de e319                      	ldi R17, dC; C
+0000df c00f                      	rjmp end_resolve
                                  
                                  try_13:
-0000dd 300d                      	cpi R16, 13
-0000de f009                      	breq set_13
-0000df c002                      	rjmp try_14
+0000e0 300d                      	cpi R16, 13
+0000e1 f009                      	breq set_13
+0000e2 c002                      	rjmp try_14
                                  set_13:
-0000e0 e51e                      	ldi R17, dD; D
-0000e1 c00a                      	rjmp end_resolve
+0000e3 e51e                      	ldi R17, dD; D
+0000e4 c00a                      	rjmp end_resolve
                                  
                                  try_14:
-0000e2 300e                      	cpi R16, 14
-0000e3 f009                      	breq set_14
-0000e4 c002                      	rjmp try_15
+0000e5 300e                      	cpi R16, 14
+0000e6 f009                      	breq set_14
+0000e7 c002                      	rjmp try_15
                                  set_14:
-0000e5 e719                      	ldi R17, dE; E
-0000e6 c005                      	rjmp end_resolve
+0000e8 e719                      	ldi R17, dE; E
+0000e9 c005                      	rjmp end_resolve
                                  
                                  try_15:
-0000e7 300f                      	cpi R16, 15
-0000e8 f009                      	breq set_15
-0000e9 c002                      	rjmp end_resolve
+0000ea 300f                      	cpi R16, 15
+0000eb f009                      	breq set_15
+0000ec c002                      	rjmp end_resolve
                                  set_15:
-0000ea e711                      	ldi R17, dF; F
-0000eb c000                      	rjmp end_resolve
+0000ed e711                      	ldi R17, dF; F
+0000ee c000                      	rjmp end_resolve
                                  
                                  end_resolve:
-0000ec 9508                      	ret
+0000ef 9508                      	ret
                                  
                                  display:
                                  ; Input - R17:digit0 
                                  
                                  	; backup used registers on stack
-0000ed 931f                      	push R17
-0000ee 932f                      	push R18
-0000ef b72f                      	in R18, SREG
-0000f0 932f                      	push R18
-0000f1 e028                      	ldi R18, 8 ; loop --> test all 8 bits
+0000f0 931f                      	push R17
+0000f1 932f                      	push R18
+0000f2 b72f                      	in R18, SREG
+0000f3 932f                      	push R18
+0000f4 e028                      	ldi R18, 8 ; loop --> test all 8 bits
                                  
                                  
                                  loop_digit0:
-0000f2 1f11                      	rol R17 ; rotate left trough Carry
-0000f3 f010                      	brcs set_ser_in_1_digit0 ; branch if Carry is set
+0000f5 1f11                      	rol R17 ; rotate left trough Carry
+0000f6 f010                      	brcs set_ser_in_1_digit0 ; branch if Carry is set
                                  	; put code here to set SER to 0
-0000f4 9828                      	cbi PORTB,SERIAL
-0000f5 c001                      	rjmp end_digit0
+0000f7 9828                      	cbi PORTB,SERIAL
+0000f8 c001                      	rjmp end_digit0
                                  set_ser_in_1_digit0:
                                  	; put code here to set SER to 1
-0000f6 9a28                      	sbi PORTB,SERIAL
+0000f9 9a28                      	sbi PORTB,SERIAL
                                  end_digit0:
                                  	; put code here to generate SRCLK pulse
-0000f7 982a                      	cbi PORTB,SRCLK
-0000f8 0000                      	nop
-0000f9 9a2a                      	sbi PORTB,SRCLK
-0000fa 0000                      	nop
-0000fb 982a                      	cbi PORTB, SRCLK
-0000fc 952a                      	dec R18
-0000fd f7a1                      	brne loop_digit0
+0000fa 982a                      	cbi PORTB,SRCLK
+0000fb 0000                      	nop
+0000fc 9a2a                      	sbi PORTB,SRCLK
+0000fd 0000                      	nop
+0000fe 982a                      	cbi PORTB, SRCLK
+0000ff 952a                      	dec R18
+000100 f7a1                      	brne loop_digit0
                                  
                                  
                                  	; put code here to generate RCLK pulse
-0000fe 9829                      	cbi PORTB,RCLK
-0000ff 0000                      	nop
-000100 9a29                      	sbi PORTB,RCLK
-000101 0000                      	nop
-000102 9829                      	cbi PORTB,RCLK
+000101 9829                      	cbi PORTB,RCLK
+000102 0000                      	nop
+000103 9a29                      	sbi PORTB,RCLK
+000104 0000                      	nop
+000105 9829                      	cbi PORTB,RCLK
                                  
                                  	; restore registers from stack
-000103 912f                      	pop R18
-000104 bf2f                      	out SREG, R18
-000105 912f                      	pop R18
-000106 911f                      	pop R17
+000106 912f                      	pop R18
+000107 bf2f                      	out SREG, R18
+000108 912f                      	pop R18
+000109 911f                      	pop R17
                                  
-000107 9508                      	ret
+00010a 9508                      	ret
                                  
                                  
                                  ; ------------ Delay times ------------
                                  
                                  
                                  delay_1s:
-000108 d002                      	rcall delay_500ms
-000109 d001                      	rcall delay_500ms
-00010a 9508                      	ret
+00010b d002                      	rcall delay_500ms
+00010c d001                      	rcall delay_500ms
+00010d 9508                      	ret
                                  
                                  
                                  delay_500ms:
                                  	; Backup registers used onto the stack
-00010b 930f                      	push r16
-00010c 931f                      	push r17
-00010d 932f                      	push r18
-00010e 933f                      	push r19
-00010f 934f                      	push r20
+00010e 930f                      	push r16
+00010f 931f                      	push r17
+000110 932f                      	push r18
+000111 933f                      	push r19
+000112 934f                      	push r20
                                  
-000110 e010                      	ldi r17, 0
-000111 e020                      	ldi r18, 0
-000112 e030                      	ldi r19, 0
-000113 e040                      	ldi r20, 0
+000113 e010                      	ldi r17, 0
+000114 e020                      	ldi r18, 0
+000115 e030                      	ldi r19, 0
+000116 e040                      	ldi r20, 0
                                  
                                  	; Initialize timer
-000114 e004                      	ldi r16, (1 << CS02)	; Set prescaler to 256
-000115 bd05                      	out TCCR0B, r16			; Set TImer0 control register B
-000116 2700                      	clr r16
-000117 bd04                      	out TCCR0A, r16			; Set Timer0 to normal mode
-000118 bd06                      	out TCNT0, r16			; Set Timer0 to 0
+000117 e004                      	ldi r16, (1 << CS02)	; Set prescaler to 256
+000118 bd05                      	out TCCR0B, r16			; Set TImer0 control register B
+000119 2700                      	clr r16
+00011a bd04                      	out TCCR0A, r16			; Set Timer0 to normal mode
+00011b bd06                      	out TCNT0, r16			; Set Timer0 to 0
                                  
                                  loop_delay_500ms:
-000119 b516                      	in r17, TCNT0	; Reader Timer0 value
-00011a 2f21                      	mov r18, r17	; Copy current reading so that arithmetic can be performed on r17
-00011b 1b10                      	sub r17, r16	; Get time difference between current reading (r17) and previous reading (r16)
-00011c 2f02                      	mov r16, r18	; Save current reading as previous reading
-00011d 0f31                      	add r19, r17	; Add time difference to running total
-00011e f00b                      	brvs add_to_counter_500ms
-00011f cff9                      	rjmp loop_delay_500ms
+00011c b516                      	in r17, TCNT0	; Reader Timer0 value
+00011d 2f21                      	mov r18, r17	; Copy current reading so that arithmetic can be performed on r17
+00011e 1b10                      	sub r17, r16	; Get time difference between current reading (r17) and previous reading (r16)
+00011f 2f02                      	mov r16, r18	; Save current reading as previous reading
+000120 0f31                      	add r19, r17	; Add time difference to running total
+000121 f00b                      	brvs add_to_counter_500ms
+000122 cff9                      	rjmp loop_delay_500ms
                                  
                                  add_to_counter_500ms:
-000120 9543                      	inc r20	; Amount of time has surpassed 256 counter ticks (256 * (1/(16000000Hz/256)) = 0.004096s)
-000121 374b                      	cpi r20, 123 ; (Check to see if 123 overflows have occurred. 123 * 0.004096s = 0.503808s)
-000122 f009                      	breq end_delay_500ms
-000123 cff5                      	rjmp loop_delay_500ms
+000123 9543                      	inc r20	; Amount of time has surpassed 256 counter ticks (256 * (1/(16000000Hz/256)) = 0.004096s)
+000124 374b                      	cpi r20, 123 ; (Check to see if 123 overflows have occurred. 123 * 0.004096s = 0.503808s)
+000125 f009                      	breq end_delay_500ms
+000126 cff5                      	rjmp loop_delay_500ms
                                  
                                  end_delay_500ms:
-000124 914f                      	pop r20
-000125 913f                      	pop r19
-000126 912f                      	pop r18
-000127 911f                      	pop r17
-000128 910f                      	pop r16
-000129 9508                      	ret
+000127 914f                      	pop r20
+000128 913f                      	pop r19
+000129 912f                      	pop r18
+00012a 911f                      	pop r17
+00012b 910f                      	pop r16
+00012c 9508                      	ret
                                  
                                  
                                  
                                  delay_10ms:
                                  	; Backup registered used onto the stack
-00012a 930f                      	push r16
-00012b 931f                      	push r17
-00012c 932f                      	push r18
-00012d 933f                      	push r19
-00012e 934f                      	push r20
+00012d 930f                      	push r16
+00012e 931f                      	push r17
+00012f 932f                      	push r18
+000130 933f                      	push r19
+000131 934f                      	push r20
                                  
-00012f e010                      	ldi r17, 0
-000130 e020                      	ldi r18, 0
-000131 e030                      	ldi r19, 0
-000132 e040                      	ldi r20, 0
+000132 e010                      	ldi r17, 0
+000133 e020                      	ldi r18, 0
+000134 e030                      	ldi r19, 0
+000135 e040                      	ldi r20, 0
                                  
                                  	; Initialize timer
-000133 e002                      	ldi r16, 0b00000010		; Set prescaler value to 8
-000134 bd05                      	out TCCR0B, r16			; Write prescaler value to control register
-000135 2700                      	clr r16
-000136 bd04                      	out TCCR0A, r16			; Set Timer0 to normal mode
-000137 bd06                      	out TCNT0, r16			; Set Timer0 to 0
+000136 e002                      	ldi r16, 0b00000010		; Set prescaler value to 8
+000137 bd05                      	out TCCR0B, r16			; Write prescaler value to control register
+000138 2700                      	clr r16
+000139 bd04                      	out TCCR0A, r16			; Set Timer0 to normal mode
+00013a bd06                      	out TCNT0, r16			; Set Timer0 to 0
                                  
                                  loop_delay_10ms:
-000138 b516                      	in r17, TCNT0	; Reader Timer0 value
-000139 2f21                      	mov r18, r17	; Copy current reading so that arithmetic can be performed on r17
-00013a 1b10                      	sub r17, r16	; Get time difference between current reading (r17) and previous reading (r16)
-00013b 2f02                      	mov r16, r18	; Save current reading as previous reading
-00013c 0f31                      	add r19, r17	; Add time difference to running total
-00013d f00b                      	brvs add_to_counter_10ms
-00013e cff9                      	rjmp loop_delay_10ms
+00013b b516                      	in r17, TCNT0	; Reader Timer0 value
+00013c 2f21                      	mov r18, r17	; Copy current reading so that arithmetic can be performed on r17
+00013d 1b10                      	sub r17, r16	; Get time difference between current reading (r17) and previous reading (r16)
+00013e 2f02                      	mov r16, r18	; Save current reading as previous reading
+00013f 0f31                      	add r19, r17	; Add time difference to running total
+000140 f00b                      	brvs add_to_counter_10ms
+000141 cff9                      	rjmp loop_delay_10ms
                                  
                                  add_to_counter_10ms:
-00013f 9543                      	inc r20	; Amount of time has surpassed 256 counter ticks (256 * (1/(16000000Hz/8)) = 0.000128s)
-000140 344e                      	cpi r20, 78 ; (Check to see if 78 overflows have occurred. 78 * 0.000128s = 0.009984s)
-000141 f009                      	breq end_delay_10ms
-000142 cff5                      	rjmp loop_delay_10ms
+000142 9543                      	inc r20	; Amount of time has surpassed 256 counter ticks (256 * (1/(16000000Hz/8)) = 0.000128s)
+000143 344e                      	cpi r20, 78 ; (Check to see if 78 overflows have occurred. 78 * 0.000128s = 0.009984s)
+000144 f009                      	breq end_delay_10ms
+000145 cff5                      	rjmp loop_delay_10ms
                                  
                                  end_delay_10ms:
-000143 914f                      	pop r20
-000144 913f                      	pop r19
-000145 912f                      	pop r18
-000146 911f                      	pop r17
-000147 910f                      	pop r16
-000148 9508                      	ret
+000146 914f                      	pop r20
+000147 913f                      	pop r19
+000148 912f                      	pop r18
+000149 911f                      	pop r17
+00014a 910f                      	pop r16
+00014b 9508                      	ret
                                  
 
 
@@ -1651,25 +1655,25 @@ counted separately from r26..r31 here.
 x  :   0 y  :   0 z  :   0 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
 r13:   0 r14:   0 r15:   0 r16:  47 r17:  38 r18:  18 r19:   8 r20:  13 
-r21:  13 r22:   7 r23:  17 r24:   3 r25:   3 r26:   3 r27:   3 r28:   3 
+r21:  14 r22:   7 r23:  17 r24:   3 r25:   3 r26:   3 r27:   3 r28:   3 
 r29:   4 r30:   0 r31:   0 
 Registers used: 14 out of 35 (40.0%)
 
 "ATmega328P" instruction use summary:
 .lds  :   0 .sts  :   0 adc   :   0 add   :   2 adiw  :   0 and   :   0 
 andi  :   1 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
-brcc  :   0 brcs  :   1 break :   0 breq  :  30 brge  :   0 brhc  :   0 
+brcc  :   0 brcs  :   2 break :   0 breq  :  30 brge  :   0 brhc  :   0 
 brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   0 
 brne  :  10 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
 brvs  :   2 bset  :   0 bst   :   0 call  :   0 cbi   :   9 cbr   :   0 
 clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   8 cls   :   0 
 clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
-cpi   :  37 cpse  :   0 dec   :   4 eor   :   0 fmul  :   0 fmuls :   0 
+cpi   :  38 cpse  :   0 dec   :   4 eor   :   0 fmul  :   0 fmuls :   0 
 fmulsu:   0 icall :   0 ijmp  :   0 in    :   4 inc   :  10 jmp   :   0 
 ld    :   0 ldd   :   0 ldi   :  44 lds   :   0 lpm   :   0 lsl   :   2 
 lsr   :   2 mov   :  11 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
 neg   :   0 nop   :   4 or    :   1 ori   :   0 out   :   7 pop   :  14 
-push  :  14 rcall :  30 ret   :  13 reti  :   0 rjmp  :  56 rol   :   1 
+push  :  14 rcall :  30 ret   :  13 reti  :   0 rjmp  :  57 rol   :   1 
 ror   :   0 sbc   :   0 sbci  :   0 sbi   :   8 sbic  :   0 sbis  :   2 
 sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
 sei   :   0 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
@@ -1680,7 +1684,7 @@ Instructions used: 28 out of 113 (24.8%)
 "ATmega328P" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x000292    658      0    658   32768   2.0%
+[.cseg] 0x000000 0x000298    664      0    664   32768   2.0%
 [.dseg] 0x000100 0x000100      0      0      0    2048   0.0%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 

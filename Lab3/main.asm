@@ -10,62 +10,26 @@
 .org 0
 
 ; 7-segement bit-patterns
-;0 = 3F
-.equ d0=0x3F
 
-;1 = 06
-.equ d1=0x06
-
-;2 = 5B
-.equ d2=0x5B
-
-;3 = 4F
-.equ d3=0x4F
-
-;4 = 66
-.equ d4=0x66
-
-;5 = 6D
-.equ d5=0x6D
-
-;6 = 7D
-.equ d6=0x7D
-
-;7 = 07
-.equ d7=0x07
-
-;8 = 7F
-.equ d8=0x7F
-
-;9 = 6F
-.equ d9=0x6F
-
-;A = 77
-.equ dA=0x77
-
-;B = 7C
-.equ dB=0x7C
-
-;C = 39
-.equ dC=0x39
-
-;D = 5E
-.equ dD=0x5E
-
-;E = 79
-.equ dE=0x79
-
-;F = 71
-.equ dF=0x71
-
-;. = 80
-.equ d_dot=0x80
-
-;- = 40
-.equ d_dash=0x40
-
-;_ = 08
-.equ d_underscore=0x08
+.equ d0=0x3F			;0 = 3F
+.equ d1=0x06			;1 = 06
+.equ d2=0x5B			;2 = 5B
+.equ d3=0x4F			;3 = 4F
+.equ d4=0x66			;4 = 66
+.equ d5=0x6D			;5 = 6D
+.equ d6=0x7D			;6 = 7D
+.equ d7=0x07			;7 = 07
+.equ d8=0x7F			;8 = 7F
+.equ d9=0x6F			;9 = 6F
+.equ dA=0x77			;A = 77
+.equ dB=0x7C			;B = 7C
+.equ dC=0x39			;C = 39
+.equ dD=0x5E			;D = 5E
+.equ dE=0x79			;E = 79
+.equ dF=0x71			;F = 71
+.equ d_dot=0x80			;. = 80
+.equ d_dash=0x40		;- = 40
+.equ d_underscore=0x08	;_ = 08
 
 
 .equ SERIAL=0		; SERIAL is PB0 (Pin 8)
@@ -101,11 +65,14 @@ ldi R28, 0	; Digit 5
 
 ; Replace with your application code
 start:
+	; 1. Check for button press
     sbis PINB, BUTTON0
 	rcall wait_for_release_button0
 
+	; 2. Read rpg
 	rcall read_rpg
 
+	; 3. Update 7-segment display
 	rcall resolve_digits
 	rcall display
 
@@ -131,17 +98,17 @@ do_clockwise:
 	rcall increment_counter
 	cpi R23, 0			; Motion from RPG should change the dash display to a digit. If R23 is 0, the dash is being displayed. Motion should cancel this.
 	brne end_do_clockwise
-	inc R23
-	clr R16
+	inc R23				; Turn R23 to 1 so as to begin displaying and accepting first digit
+	clr R16				; Because increment_counter is called above, R16 must be cleared to begin display on 0.
 end_do_clockwise: 
 	rjmp end_read_rpg
 
 do_counterclockwise:
 	rcall decrement_counter
-	cpi R23, 0
+	cpi R23, 0			; Motion from RPG should get rid of displaying dash and begin displaying numbers.
 	brne end_do_counterclockwise
-	inc R23
-	clr R16
+	inc R23				; Incrementing R23 moves display from a dash to actual numbers
+	clr R16				; Although decrement won't decrement to zero, because display is beginning to display numbers, best to ensure that it starts out on zero.
 end_do_counterclockwise:
 	rjmp end_read_rpg
 
@@ -151,26 +118,26 @@ end_read_rpg:
 
 
 enter_digit:
-try_1:
+try_1: ; R23 = 1, Digit 1 is being entered
 	cpi R23, 1
 	breq enter_1
 	rjmp try_2
 enter_1:
-	mov R24, R16
-	inc R23
-	rcall flash_digit
+	mov R24, R16 ; Store current counter value in R24. This value is stored for Digit 1.
+	inc R23		 ; Increment counter to 2 (Digit 2)
+	rcall flash_digit ; Flash confirmation of input
 	rjmp end_enter_digit
 try_2:
-	cpi R23, 2
+	cpi R23, 2	; Check to see if Digit 2 is being entered
 	breq enter_2
 	rjmp try_3
 enter_2:
 	mov R25, R16
-	inc R23
+	inc R23		; Increment counter to 3 (Digit 3)
 	rcall flash_digit
 	rjmp end_enter_digit
 try_3:
-	cpi R23, 3
+	cpi R23, 3	; Check to see if Digit 3 is being entered
 	breq enter_3
 	rjmp try_4
 enter_3:
@@ -192,8 +159,8 @@ try_5:
 	breq enter_5
 	rjmp end_enter_digit
 enter_5:
-	mov R28, R16
-	rcall test_lock_sequence
+	mov R28, R16	; Store Digit 5
+	rcall test_lock_sequence ; Now that 5 digits have been entered, test the sequence against the preset code
 	clr R23 ; Reset digit counter to 0. Begin displaying dash and allowing input.
 	rjmp end_enter_digit
 
@@ -244,22 +211,25 @@ end_test_lock_sequence:
 
 
 flash_digit:
-	ldi R17, 0
-	rcall display
-	rcall delay_500ms
+	push R16 ; Backup affected registers
+	push R17
 
-	rcall resolve_digits
-	rcall display
-	rcall delay_500ms
+	ldi R16, 2 ; Loop counter
 
-	ldi R17, 0
-	rcall display
-	rcall delay_500ms
+loop_flash_digit:
+	ldi R17, 0		; Turn all segments off (i.e. turn off display)
+	rcall display	; Update 7-segment display
+	rcall delay_500ms	; Hold for 0.5s
 
-	rcall resolve_digits
-	rcall display
-	rcall delay_500ms
+	rcall resolve_digits ; Load current counter-value (i.e. turn display back on)
+	rcall display		 ; Update 7-segment display
+	rcall delay_500ms	 ; Hold for 0.5s
 
+	dec R16				 ; Loop counter
+	brne loop_flash_digit
+
+	pop R17 ; Restore affected registers
+	pop R16
 	ret
 
 
@@ -293,9 +263,13 @@ button0_held:
 	sbis PINB, BUTTON0
 	rjmp button0_held
 
-	cpi R21, 100
+	cpi R21, 101	; Check number of 10ms delays the button was held for. If less than 101 delays (<=1s), enter current digit
+	brcs less_than_101
+	cpi R21, 200	; Check number of 10ms delays the button was held for. Maxes out at 200 (2s).
 	breq reset_counter
+	rjmp end_wait_for_release_button0
 
+less_than_101:
 	rcall enter_digit
 	rjmp end_wait_for_release_button0
 
@@ -308,7 +282,7 @@ end_wait_for_release_button0:
 	ret
 
 increment_button_timer:
-	cpi R21, 100
+	cpi R21, 200
 	breq end_increment_button_timer
 	inc R21
 end_increment_button_timer:
@@ -558,7 +532,7 @@ end_delay_500ms:
 
 
 delay_10ms:
-	; Backup registered used onto the stack
+	; Backup registers used onto the stack
 	push r16
 	push r17
 	push r18
