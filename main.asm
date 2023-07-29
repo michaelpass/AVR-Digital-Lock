@@ -1,5 +1,9 @@
 ;
-; Lab3.asm
+; main.asm
+
+; This project represents a digital lock.
+; User inputs a number sequence using an RPG and button
+; If code sequence matches DA181, lock will open. Otherwise, fails.
 ;
 ; Created: 2/28/2023 9:49:10 PM
 ; Author : stlondon, mpass
